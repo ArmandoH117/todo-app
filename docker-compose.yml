@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: todo-db
+    environment:
+      POSTGRES_DB: todo_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"   # opcional; útil si quieres entrar con psql desde el host
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d todo_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: todo-backend
+    environment:
+      # Puerto donde escucha Express
+      PORT: "3000"
+      # Conexión a Postgres usando el nombre del servicio "db"
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: todo_db
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      # Alternativa (no necesaria si usas variables sueltas):
+      # DATABASE_URL: postgres://postgres:postgres@db:5432/todo_db
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
