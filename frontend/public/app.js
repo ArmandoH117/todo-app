@@ -1,4 +1,4 @@
-const API = `http://localhost:3000`;
+const API = "http://localhost:3000";
 
 const list = document.querySelector("#list");
 const form = document.querySelector("#new-form");
@@ -27,22 +27,30 @@ async function loadTasks() {
     list.innerHTML = "";
     for (const t of tasks) {
       const li = document.createElement("li");
-      li.className = t.done ? "done" : "";
+      li.className = t.completed ? "done" : "";
       li.innerHTML = `
         <span>
-          <input class="checkbox" type="checkbox" ${t.done ? "checked" : ""} />
+          <input class="checkbox" type="checkbox" ${t.completed ? "checked" : ""} />
           <strong>#${t.id}</strong> ${escapeHtml(t.title)}
         </span>
         <span class="action">
-          <button class="toggle">${t.done ? "Desmarcar" : "Completar"}</button>
+          <button class="toggle">${t.completed ? "Desmarcar" : "Completar"}</button>
           <button class="danger delete">Eliminar</button>
         </span>
       `;
 
+      li.querySelector(".checkbox").onchange = async (ev) => {
+        await fetchJSON(`${API}/tasks/${t.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ completed: Boolean(ev.target.checked) }),
+        });
+        await loadTasks();
+      };
+
       li.querySelector(".toggle").onclick = async () => {
         await fetchJSON(`${API}/tasks/${t.id}`, {
           method: "PUT",
-          body: JSON.stringify({ done: !t.done }),
+          body: JSON.stringify({ completed: !t.completed }),
         });
         await loadTasks();
       };
@@ -52,18 +60,10 @@ async function loadTasks() {
         await loadTasks();
       };
 
-      li.querySelector(".checkbox").onchange = async (ev) => {
-        await fetchJSON(`${API}/tasks/${t.id}`, {
-          method: "PUT",
-          body: JSON.stringify({ done: ev.target.checked }),
-        });
-        await loadTasks();
-      };
-
       list.appendChild(li);
     }
   } catch (e) {
-    list.innerHTML = `<li>Error: ${e.message}</li>`;
+    list.innerHTML = `<li>Error: ${escapeHtml(e.message)}</li>`;
   }
 }
 
@@ -80,13 +80,10 @@ form.onsubmit = async (e) => {
 };
 
 function escapeHtml(s) {
-  return s.replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[
-        c
-      ])
-  );
+  return s.replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]
+  ));
 }
 
 loadTasks();
+
