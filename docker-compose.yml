@@ -19,7 +19,6 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     container_name: todo-backend
     environment:
       PORT: "3000"
@@ -39,7 +38,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     container_name: todo-frontend
     ports:
       - "8080:80"
@@ -47,7 +45,5 @@ services:
       - backend
     restart: unless-stopped
 
-# 👇 Definición top-level del volumen nombrado
 volumes:
   pgdata: {}
-
