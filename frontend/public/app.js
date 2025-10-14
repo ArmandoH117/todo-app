@@ -1,4 +1,4 @@
-const API = "http://localhost:3000";
+const API = `http://localhost:3000`;
 
 const list = document.querySelector("#list");
 const form = document.querySelector("#new-form");
@@ -26,37 +26,45 @@ async function loadTasks() {
     }
     list.innerHTML = "";
     for (const t of tasks) {
+      // Soporta backends que devuelven 'done' o 'completed'
+      const isDone = typeof t.done === "boolean" ? t.done
+                    : typeof t.completed === "boolean" ? t.completed
+                    : false;
+
       const li = document.createElement("li");
-      li.className = t.completed ? "done" : "";
+      li.className = isDone ? "done" : "";
       li.innerHTML = `
         <span>
-          <input class="checkbox" type="checkbox" ${t.completed ? "checked" : ""} />
+          <input class="checkbox" type="checkbox" ${isDone ? "checked" : ""} />
           <strong>#${t.id}</strong> ${escapeHtml(t.title)}
         </span>
         <span class="action">
-          <button class="toggle">${t.completed ? "Desmarcar" : "Completar"}</button>
+          <button class="toggle">${isDone ? "Desmarcar" : "Completar"}</button>
           <button class="danger delete">Eliminar</button>
         </span>
       `;
 
-      li.querySelector(".checkbox").onchange = async (ev) => {
-        await fetchJSON(`${API}/tasks/${t.id}`, {
-          method: "PUT",
-          body: JSON.stringify({ completed: Boolean(ev.target.checked) }),
-        });
-        await loadTasks();
-      };
-
+      // Toggle por botón
       li.querySelector(".toggle").onclick = async () => {
         await fetchJSON(`${API}/tasks/${t.id}`, {
           method: "PUT",
-          body: JSON.stringify({ completed: !t.completed }),
+          body: JSON.stringify({ completed: !isDone }),
         });
         await loadTasks();
       };
 
+      // Eliminar
       li.querySelector(".delete").onclick = async () => {
         await fetchJSON(`${API}/tasks/${t.id}`, { method: "DELETE" });
+        await loadTasks();
+      };
+
+      // Toggle por checkbox
+      li.querySelector(".checkbox").onchange = async (ev) => {
+        await fetchJSON(`${API}/tasks/${t.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ completed: ev.target.checked }),
+        });
         await loadTasks();
       };
 
