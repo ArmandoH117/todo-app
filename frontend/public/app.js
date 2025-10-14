@@ -1,4 +1,4 @@
-const API = `http://localhost:3000`;
+const API = "http://localhost:3000";
 
 const list = document.querySelector("#list");
 const form = document.querySelector("#new-form");
@@ -19,75 +19,65 @@ async function fetchJSON(url, options) {
 async function loadTasks() {
   list.innerHTML = "<li>Cargando...</li>";
   try {
-    const tasks = await fetchJSON(`${API}/tasks`);
+    const tasks = await fetchJSON(${API}/tasks);
     if (!tasks.length) {
       list.innerHTML = "<li>No hay tareas aún</li>";
       return;
     }
     list.innerHTML = "";
     for (const t of tasks) {
-      // Soporta backends que devuelven 'done' o 'completed'
-      const isDone = typeof t.done === "boolean" ? t.done
-                    : typeof t.completed === "boolean" ? t.completed
-                    : false;
-
       const li = document.createElement("li");
-      li.className = isDone ? "done" : "";
+      li.className = t.completed ? "done" : "";
       li.innerHTML = `
         <span>
-          <input class="checkbox" type="checkbox" ${isDone ? "checked" : ""} />
-          <strong>#${t.id}</strong> ${escapeHtml(t.title)}
+          <input class="checkbox" type="checkbox" ${t.completed ? "checked" : ""} />
+          <strong>#${t.id}</strong> <span class="title">${escapeHtml(t.title)}</span>
         </span>
         <span class="action">
-          <button class="toggle">${isDone ? "Desmarcar" : "Completar"}</button>
-      li.className = t.done ? "done" : "";
-      li.innerHTML = `
-        <span>
-          <input class="checkbox" type="checkbox" ${t.done ? "checked" : ""} />
-          <strong>#${t.id}</strong> ${escapeHtml(t.title)}
-        </span>
-        <span class="action">
-          <button class="toggle">${t.done ? "Desmarcar" : "Completar"}</button>
+          <button class="toggle">${t.completed ? "Desmarcar" : "Completar"}</button>
+          <button class="edit">Editar</button>
           <button class="danger delete">Eliminar</button>
         </span>
       `;
 
-      // Toggle por botón
-      li.querySelector(".toggle").onclick = async () => {
-        await fetchJSON(`${API}/tasks/${t.id}`, {
+      li.querySelector(".checkbox").onchange = async (ev) => {
+        await fetchJSON(${API}/tasks/${t.id}, {
           method: "PUT",
-          body: JSON.stringify({ completed: !isDone }),
-      li.querySelector(".toggle").onclick = async () => {
-        await fetchJSON(`${API}/tasks/${t.id}`, {
-          method: "PUT",
-          body: JSON.stringify({ done: !t.done }),
+          body: JSON.stringify({ completed: Boolean(ev.target.checked) }),
         });
         await loadTasks();
       };
 
-      // Eliminar
+      li.querySelector(".toggle").onclick = async () => {
+        await fetchJSON(${API}/tasks/${t.id}, {
+          method: "PUT",
+          body: JSON.stringify({ completed: !t.completed }),
+        });
+        await loadTasks();
+      };
+
+      li.querySelector(".edit").onclick = async () => {
+        const current = t.title;
+        const next = prompt("Nuevo título:", current);
+        if (next === null) return; 
+        const title = (next || "").trim();
+        if (!title || title === current) return;
+        await fetchJSON(${API}/tasks/${t.id}, {
+          method: "PUT",
+          body: JSON.stringify({ title }),
+        });
+        await loadTasks();
+      };
+
       li.querySelector(".delete").onclick = async () => {
-        await fetchJSON(`${API}/tasks/${t.id}`, { method: "DELETE" });
-        await loadTasks();
-      };
-
-      // Toggle por checkbox
-      li.querySelector(".checkbox").onchange = async (ev) => {
-        await fetchJSON(`${API}/tasks/${t.id}`, {
-          method: "PUT",
-          body: JSON.stringify({ completed: ev.target.checked }),
-      li.querySelector(".checkbox").onchange = async (ev) => {
-        await fetchJSON(`${API}/tasks/${t.id}`, {
-          method: "PUT",
-          body: JSON.stringify({ done: ev.target.checked }),
-        });
+        await fetchJSON(${API}/tasks/${t.id}, { method: "DELETE" });
         await loadTasks();
       };
 
       list.appendChild(li);
     }
   } catch (e) {
-    list.innerHTML = `<li>Error: ${escapeHtml(e.message)}</li>`;
+    list.innerHTML = <li>Error: ${escapeHtml(e.message)}</li>;
   }
 }
 
@@ -95,7 +85,7 @@ form.onsubmit = async (e) => {
   e.preventDefault();
   const title = (input.value || "").trim();
   if (!title) return;
-  await fetchJSON(`${API}/tasks`, {
+  await fetchJSON(${API}/tasks, {
     method: "POST",
     body: JSON.stringify({ title }),
   });
@@ -110,4 +100,3 @@ function escapeHtml(s) {
 }
 
 loadTasks();
-
