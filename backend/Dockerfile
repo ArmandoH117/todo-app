@@ -1,4 +1,4 @@
-FROM node:18-alpine
+ROM node:18-alpine
 
 # Crea usuario no root (mejor práctica)
 RUN addgroup -S nodegrp && adduser -S nodeusr -G nodegrp
