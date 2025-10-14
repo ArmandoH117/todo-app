@@ -19,7 +19,6 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     container_name: todo-backend
     environment:
       PORT: "3000"
@@ -36,7 +35,15 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-# 👇 Definición top-level del volumen nombrado
+  frontend:
+    build:
+      context: ./frontend
+    container_name: todo-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   pgdata: {}
-
