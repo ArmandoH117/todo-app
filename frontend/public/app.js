@@ -30,11 +30,18 @@ async function loadTasks() {
       li.className = t.completed ? "done" : "";
       li.innerHTML = `
         <span>
-          <input class="checkbox" type="checkbox" ${t.completed ? "checked" : ""} />
-          <strong>#${t.id}</strong> ${escapeHtml(t.title)}
+          <input class="checkbox" type="checkbox" ${
+            t.completed ? "checked" : ""
+          } />
+          <strong>#${t.id}</strong> <span class="title">${escapeHtml(
+        t.title
+      )}</span>
         </span>
         <span class="action">
-          <button class="toggle">${t.completed ? "Desmarcar" : "Completar"}</button>
+          <button class="toggle">${
+            t.completed ? "Desmarcar" : "Completar"
+          }</button>
+          <button class="edit">Editar</button>
           <button class="danger delete">Eliminar</button>
         </span>
       `;
@@ -51,6 +58,19 @@ async function loadTasks() {
         await fetchJSON(`${API}/tasks/${t.id}`, {
           method: "PUT",
           body: JSON.stringify({ completed: !t.completed }),
+        });
+        await loadTasks();
+      };
+
+      li.querySelector(".edit").onclick = async () => {
+        const current = t.title;
+        const next = prompt("Nuevo título:", current);
+        if (next === null) return;
+        const title = (next || "").trim();
+        if (!title || title === current) return;
+        await fetchJSON(`${API}/tasks/${t.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ title }),
         });
         await loadTasks();
       };
@@ -80,10 +100,13 @@ form.onsubmit = async (e) => {
 };
 
 function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, (c) => (
-    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]
-  ));
+  return s.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[
+        c
+      ])
+  );
 }
 
 loadTasks();
-
