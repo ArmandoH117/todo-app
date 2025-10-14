@@ -40,6 +40,14 @@ async function loadTasks() {
         </span>
         <span class="action">
           <button class="toggle">${isDone ? "Desmarcar" : "Completar"}</button>
+      li.className = t.done ? "done" : "";
+      li.innerHTML = `
+        <span>
+          <input class="checkbox" type="checkbox" ${t.done ? "checked" : ""} />
+          <strong>#${t.id}</strong> ${escapeHtml(t.title)}
+        </span>
+        <span class="action">
+          <button class="toggle">${t.done ? "Desmarcar" : "Completar"}</button>
           <button class="danger delete">Eliminar</button>
         </span>
       `;
@@ -49,6 +57,10 @@ async function loadTasks() {
         await fetchJSON(`${API}/tasks/${t.id}`, {
           method: "PUT",
           body: JSON.stringify({ completed: !isDone }),
+      li.querySelector(".toggle").onclick = async () => {
+        await fetchJSON(`${API}/tasks/${t.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ done: !t.done }),
         });
         await loadTasks();
       };
@@ -64,6 +76,10 @@ async function loadTasks() {
         await fetchJSON(`${API}/tasks/${t.id}`, {
           method: "PUT",
           body: JSON.stringify({ completed: ev.target.checked }),
+      li.querySelector(".checkbox").onchange = async (ev) => {
+        await fetchJSON(`${API}/tasks/${t.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ done: ev.target.checked }),
         });
         await loadTasks();
       };
