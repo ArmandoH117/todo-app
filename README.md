@@ -75,6 +75,7 @@ Diagrama (texto):
 ### 1. Clonar repositorio
 git clone https://github.com/ArmandoH117/todo-app.git
 cd todo-app
+npm install (instalacion de node_modules)
 
 ### 2. Levantar servicios
 docker compose build
@@ -175,4 +176,3 @@ curl -i -X DELETE http://localhost:3000/tasks/1
 
 ## Enlace del Repositorio
 https://github.com/ArmandoH117/todo-app.git
-
